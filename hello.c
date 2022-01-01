@@ -7,20 +7,29 @@
 #include<linux/linkage.h>
  #include<uapi/linux/kvm_para.h>
  #include<linux/cpumask.h>
+#include <sys/mman.h> //mlock to prevent swap out
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Lakshmanan");
 MODULE_DESCRIPTION("A Simple Hello World module");
- 
+
+unsigned char dump_space[16];
+
 static int __init hello_init(void)
 {
-	    printk(KERN_INFO "Hello world!\n");
-		kvm_hypercall0(12);
-		    return 0;    // Non-zero return means that the module couldn't be loaded.
+    int i = 0;
+	printk(KERN_INFO "Hello world!\n");
+    mlock(dump_space, 16);
+    for(i = 0; i < 16; i++){
+        dump_space[i] = 0x00 + i;
+    }
+	kvm_hypercall1(12, dump_space);
+	return 0;    // Non-zero return means that the module couldn't be loaded.
 }
- 
+
 static void __exit hello_cleanup(void)
 {
-	    printk(KERN_INFO "Cleaning up module.\n");
+    munlock(dump_space, 16);
+    printk(KERN_INFO "Cleaning up module.\n");
 }
  
 module_init(hello_init);
