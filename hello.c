@@ -22,7 +22,7 @@ static int __init hello_init(void)
 {
     int i = 0;
 	printk(KERN_INFO "Hello world!\n");
-    mlock(dump_space, 16);
+    //mlock(dump_space, 16);
     for(i = 0; i < 16; i++){
         dump_space[i] = 0x00 + i;
     }
@@ -32,7 +32,7 @@ static int __init hello_init(void)
 
 static void __exit hello_cleanup(void)
 {
-    munlock(dump_space, 16);
+    //munlock(dump_space, 16);
     printk(KERN_INFO "Cleaning up module.\n");
 }
  
