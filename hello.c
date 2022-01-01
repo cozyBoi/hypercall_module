@@ -26,6 +26,8 @@ static int __init hello_init(void)
     for(i = 0; i < 16; i++){
         dump_space[i] = 0x00 + i;
     }
+	printk(KERN_INFO "Hypercall %p\n", dump_space);
+    
 	kvm_hypercall1(12, dump_space);
 	return 0;    // Non-zero return means that the module couldn't be loaded.
 }
