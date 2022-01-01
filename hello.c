@@ -7,7 +7,11 @@
 #include<linux/linkage.h>
  #include<uapi/linux/kvm_para.h>
  #include<linux/cpumask.h>
-#include <sys/mman.h> //mlock to prevent swap out
+//#include <sys/mman.h> //mlock to prevent swap out
+#include <sys/types.h>
+#include <sys/errno.h>
+#include <sys/pin.h>
+
 MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Lakshmanan");
 MODULE_DESCRIPTION("A Simple Hello World module");
