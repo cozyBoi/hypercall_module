@@ -43,6 +43,7 @@ static int __init hello_init(void)
     addr = (long long int)dump_space;
     
     low_addr = (long int)(addr % pow16(8));
+    printk("%llx\n",addr);
     addr = addr - low_addr;
     printk("%llx\n",addr);
     addr = addr / pow16(8);
