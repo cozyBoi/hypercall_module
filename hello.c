@@ -30,7 +30,7 @@ long long int pow16(int p){
 static int __init hello_init(void)
 {
     int i = 0;
-    long int high_addr = 0, low_addr = 0;
+    long long int high_addr = 0, low_addr = 0;
     long long int addr = 0;
     char address_char[30];
 	printk(KERN_INFO "Hello world!\n");
@@ -42,6 +42,9 @@ static int __init hello_init(void)
     
     addr = (long long int)dump_space;
     
+    printk("[test] high %llx low %llx\n", addr / pow16(8), addr % pow16(8));
+    
+    /*
     low_addr = (long int)(addr % pow16(8));
     printk("%llx\n",addr);
     addr = addr - low_addr;
@@ -50,7 +53,7 @@ static int __init hello_init(void)
     printk("%llx\n",addr);
     high_addr = (long int)addr;
     printk("%lx\n",high_addr);
-    
+    */
     
     printk("high %lx low %lx\n", high_addr, low_addr);
     
