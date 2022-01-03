@@ -7,6 +7,7 @@
 #include<linux/linkage.h>
  #include<uapi/linux/kvm_para.h>
  #include<linux/cpumask.h>
+#include <string.h>
 //#include <sys/mman.h> //mlock to prevent swap out
 //#include <sys/types.h>
 //#include <sys/errno.h>
@@ -18,17 +19,48 @@ MODULE_DESCRIPTION("A Simple Hello World module");
 
 unsigned char dump_space[16];
 
+long int pow16(int p){
+    int i = 0, ret = 1;
+    for(i = 0; i < p; i++){
+        ret *= 16;
+    }
+    return ret;
+}
+
 static int __init hello_init(void)
 {
     int i = 0;
+    long int high_addr = 0, low_addr = 0;
+    char address_char[30];
 	printk(KERN_INFO "Hello world!\n");
     //mlock(dump_space, 16);
     for(i = 0; i < 16; i++){
-        dump_space[i] = 0x00 + i;
+        dump_space[i] = 0x00;
     }
 	printk(KERN_INFO "Hypercall %p\n", dump_space);
     
-	kvm_hypercall1(12, dump_space);
+    sprintf(address_char, "%p", dump_space);
+    for(i = 15; i >= 8; i--){
+        if('a' <= address_char[i] && address_char[i] <= 'f'){
+            high_addr += (address_char[i] - 'a' + 10) * pow16(i-8);
+        }
+        else if('0' <= address_char[i] && address_char[i] <= '9'){
+            high_addr += (address_char[i] - '0') * pow16(i-8);
+        }
+    }
+    
+    for(i = 7; i >= 0; i--){
+        if('a' <= address_char[i] && address_char[i] <= 'f'){
+            low_addr += (address_char[i] - 'a' + 10) * pow16(i);
+        }
+        else if('0' <= address_char[i] && address_char[i] <= '9'){
+            low_addr += (address_char[i] - '0') * pow16(i);
+        }
+    }
+    
+    printf("high %lx low %lx\n", high_addr, low_addr);
+    
+	kvm_hypercall2(12, high_addr, low_addr);
 	return 0;    // Non-zero return means that the module couldn't be loaded.
 }
 
