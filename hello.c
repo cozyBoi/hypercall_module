@@ -7,7 +7,6 @@
 #include<linux/linkage.h>
  #include<uapi/linux/kvm_para.h>
  #include<linux/cpumask.h>
-#include <string.h>
 //#include <sys/mman.h> //mlock to prevent swap out
 //#include <sys/types.h>
 //#include <sys/errno.h>
@@ -30,7 +29,7 @@ long int pow16(int p){
 static int __init hello_init(void)
 {
     int i = 0;
-    long int high_addr = 0, low_addr = 0;
+    long int high_addr = 0, low_addr = 0, addr;
     char address_char[30];
 	printk(KERN_INFO "Hello world!\n");
     //mlock(dump_space, 16);
@@ -39,24 +38,10 @@ static int __init hello_init(void)
     }
 	printk(KERN_INFO "Hypercall %p\n", dump_space);
     
-    sprintf(address_char, "%p", dump_space);
-    for(i = 15; i >= 8; i--){
-        if('a' <= address_char[i] && address_char[i] <= 'f'){
-            high_addr += (address_char[i] - 'a' + 10) * pow16(i-8);
-        }
-        else if('0' <= address_char[i] && address_char[i] <= '9'){
-            high_addr += (address_char[i] - '0') * pow16(i-8);
-        }
-    }
+    addr = (long int)dump_space;
     
-    for(i = 7; i >= 0; i--){
-        if('a' <= address_char[i] && address_char[i] <= 'f'){
-            low_addr += (address_char[i] - 'a' + 10) * pow16(i);
-        }
-        else if('0' <= address_char[i] && address_char[i] <= '9'){
-            low_addr += (address_char[i] - '0') * pow16(i);
-        }
-    }
+    high_addr = addr / pow16(4) / pow16(4);
+    low_addr = addr % pow16(4);
     
     printf("high %lx low %lx\n", high_addr, low_addr);
     
