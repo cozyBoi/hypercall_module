@@ -18,8 +18,9 @@ MODULE_DESCRIPTION("A Simple Hello World module");
 
 unsigned char dump_space[16];
 
-long int pow16(int p){
-    int i = 0, ret = 1;
+long long int pow16(int p){
+    int i = 0;
+    long long int ret = 1;
     for(i = 0; i < p; i++){
         ret *= 16;
     }
@@ -29,7 +30,8 @@ long int pow16(int p){
 static int __init hello_init(void)
 {
     int i = 0;
-    long int high_addr = 0, low_addr = 0, addr;
+    long int high_addr = 0, low_addr = 0;
+    long long int addr = 0;
     char address_char[30];
 	printk(KERN_INFO "Hello world!\n");
     //mlock(dump_space, 16);
@@ -38,10 +40,10 @@ static int __init hello_init(void)
     }
 	printk(KERN_INFO "Hypercall %p\n", dump_space);
     
-    addr = (long int)dump_space;
+    addr = (long long int)dump_space;
     
-    high_addr = addr / pow16(4) / pow16(4);
-    low_addr = addr % pow16(4);
+    high_addr = (long int)(addr / pow16(8) / pow16(8));
+    low_addr = (long int)(addr % pow16(8));
     
     printk("high %lx low %lx\n", high_addr, low_addr);
     
