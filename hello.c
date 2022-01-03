@@ -18,9 +18,9 @@ MODULE_DESCRIPTION("A Simple Hello World module");
 
 unsigned char dump_space[16];
 
-long long int pow16(int p){
+unsigned long long int pow16(int p){
     int i = 0;
-    long long int ret = 1;
+    unsigned long long int ret = 1;
     for(i = 0; i < p; i++){
         ret *= 16;
     }
@@ -30,30 +30,17 @@ long long int pow16(int p){
 static int __init hello_init(void)
 {
     int i = 0;
-    long long int high_addr = 0, low_addr = 0;
-    long long int addr = 0;
-    char address_char[30];
-	printk(KERN_INFO "Hello world!\n");
-    //mlock(dump_space, 16);
+    long int high_addr = 0, low_addr = 0;
+    unsigned long long int addr = 0;
     for(i = 0; i < 16; i++){
         dump_space[i] = 0x00;
     }
 	printk(KERN_INFO "Hypercall %p\n", dump_space);
     
-    addr = (long long int)dump_space;
-    
-    printk("[test] high %llx low %llx\n", addr / pow16(8), addr % pow16(8));
-    
-    /*
+    addr = (unsigned long long int)dump_space;
+	
+    high_addr = (long int)(addr / pow16(8));
     low_addr = (long int)(addr % pow16(8));
-    printk("%llx\n",addr);
-    addr = addr - low_addr;
-    printk("%llx\n",addr);
-    addr = addr / pow16(8);
-    printk("%llx\n",addr);
-    high_addr = (long int)addr;
-    printk("%lx\n",high_addr);
-    */
     
     printk("high %lx low %lx\n", high_addr, low_addr);
     
