@@ -43,7 +43,7 @@ static int __init hello_init(void)
     high_addr = addr / pow16(4) / pow16(4);
     low_addr = addr % pow16(4);
     
-    printf("high %lx low %lx\n", high_addr, low_addr);
+    printk("high %lx low %lx\n", high_addr, low_addr);
     
 	kvm_hypercall2(12, high_addr, low_addr);
 	return 0;    // Non-zero return means that the module couldn't be loaded.
