@@ -1,12 +1,13 @@
 #include <linux/module.h>    // included for all kernel modules
 #include <linux/kernel.h>    // included for KERN_INFO
 #include <linux/init.h>      // included for __init and __exit macros
-#include<linux/kernel.h>
-#include<linux/syscalls.h>
-#include<linux/init.h>
-#include<linux/linkage.h>
- #include<uapi/linux/kvm_para.h>
- #include<linux/cpumask.h>
+#include <linux/kernel.h>
+#include <linux/syscalls.h>
+#include <linux/init.h>
+#include <linux/linkage.h>
+#include <uapi/linux/kvm_para.h>
+#include <linux/cpumask.h>
+#include <linux/delay.h>
 //#include <sys/mman.h> //mlock to prevent swap out
 //#include <sys/types.h>
 //#include <sys/errno.h>
@@ -35,6 +36,10 @@ static int __init hello_init(void)
     for(i = 0; i < 16; i++){
         dump_space[i] = 0x00;
     }
+    for(i = 0; i < 16; i++){
+        printk("%x ", dump_space[i]);
+    }
+	printk("\n");
 	printk(KERN_INFO "Hypercall %p\n", dump_space);
     
     addr = (unsigned long long int)dump_space;
@@ -45,6 +50,13 @@ static int __init hello_init(void)
     printk("high %lx low %lx\n", high_addr, low_addr);
     
 	kvm_hypercall2(12, high_addr, low_addr);
+
+	usleep_range(1000000, 1000001);
+
+    for(i = 0; i < 16; i++){
+        printk("%x ", dump_space[i]);
+    }
+	printk("\n");
 	return 0;    // Non-zero return means that the module couldn't be loaded.
 }
 
