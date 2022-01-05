@@ -8,6 +8,7 @@
 #include <uapi/linux/kvm_para.h>
 #include <linux/cpumask.h>
 #include <linux/delay.h>
+//#include <linux/mm_type.h>
 //#include <sys/mman.h> //mlock to prevent swap out
 //#include <sys/types.h>
 //#include <sys/errno.h>
@@ -18,6 +19,8 @@ MODULE_AUTHOR("Lakshmanan");
 MODULE_DESCRIPTION("A Simple Hello World module");
 
 unsigned char dump_space[16];
+
+extern struct page *mem_map;
 
 unsigned long long int pow16(int p){
     int i = 0;
