@@ -18,9 +18,10 @@ MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Lakshmanan");
 MODULE_DESCRIPTION("A Simple Hello World module");
 
-unsigned char dump_space[16];
+unsigned long long int dump_space = 1;
 
-extern struct page *mem_map;
+extern struct mem_section *mem_section[NR_SECTION_ROOTS];
+extern inline struct mem_section *__pfn_to_section(unsigned long pfn);
 
 unsigned long long int pow16(int p){
     int i = 0;
@@ -35,7 +36,9 @@ static int __init hello_init(void)
 {
     int i = 0;
     long int high_addr = 0, low_addr = 0;
-    unsigned long long int addr = 0;
+    unsigned long long int addr = 0, gpa_pfn = 0;
+	struct page*curr_pages = NULL;
+	/*
     for(i = 0; i < 16; i++){
         dump_space[i] = 0x00;
     }
@@ -44,8 +47,11 @@ static int __init hello_init(void)
     }
 	printk("\n");
 	printk(KERN_INFO "Hypercall %p\n", dump_space);
+	*/
+	printk(KERN_INFO "Hypercall\n");
+	printk("dump data %llx\n", dump_space);
     
-    addr = (unsigned long long int)dump_space;
+    addr = (unsigned long long int)&dump_space;
 	
     high_addr = (long int)(addr / pow16(8));
     low_addr = (long int)(addr % pow16(8));
@@ -55,11 +61,20 @@ static int __init hello_init(void)
 	kvm_hypercall2(12, high_addr, low_addr);
 
 	usleep_range(1000000, 1000001);
-
+	/*
     for(i = 0; i < 16; i++){
         printk("%x ", dump_space[i]);
     }
 	printk("\n");
+	*/
+	printk("dump data %llx\n", dump_space);
+	unsigned long int curr_pfn = dump_space >> 12;
+	struct mem_section *curr_memsect = __pfn_to_section(curr_pfn);
+	printk("mem_section %p\n", curr_memsect);
+	printk("before curr_pages %p\n", curr_pages);
+	curr_pages = curr_memsect->section_mem_map;
+	printk("after curr_pages %p\n", curr_pages);
+	printk("page_to_phys %p\n", page_to_phys(curr_pages));
 	return 0;    // Non-zero return means that the module couldn't be loaded.
 }
 
