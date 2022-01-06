@@ -22,6 +22,8 @@ unsigned long long int dump_space = 1;
 
 extern struct mem_section *mem_section[NR_SECTION_ROOTS];
 extern inline struct mem_section *__pfn_to_section(unsigned long pfn);
+extern unsigned long usr_page_to_pfn(struct page *page);
+extern struct page* usr_pfn_to_page(unsigned long pfn);
 
 unsigned long long int pow16(int p){
     int i = 0;
@@ -36,8 +38,9 @@ static int __init hello_init(void)
 {
     int i = 0;
     long int high_addr = 0, low_addr = 0;
-    unsigned long long int addr = 0, gpa_pfn = 0;
-	struct page*curr_pages = NULL;
+    unsigned long long int addr = 0;
+	struct page*curr_page = NULL;
+	unsigned long int curr_pfn;
 	/*
     for(i = 0; i < 16; i++){
         dump_space[i] = 0x00;
@@ -68,13 +71,21 @@ static int __init hello_init(void)
 	printk("\n");
 	*/
 	printk("dump data %llx\n", dump_space);
-	unsigned long int curr_pfn = dump_space >> 12;
+	curr_pfn = dump_space >> 12;
+	curr_page = usr_pfn_to_page(curr_pfn);
+	printk("page_to_pfn %lx\n", usr_page_to_pfn(curr_page));
+	/*
 	struct mem_section *curr_memsect = __pfn_to_section(curr_pfn);
 	printk("mem_section %p\n", curr_memsect);
 	printk("before curr_pages %p\n", curr_pages);
 	curr_pages = curr_memsect->section_mem_map;
 	printk("after curr_pages %p\n", curr_pages);
-	printk("page_to_phys %p\n", page_to_phys(curr_pages));
+	for(i = 0; i < 256 * 1024; i++){
+		void*tmp = page_to_phys(&curr_pages[i]);
+		if(tmp == (void*)dump_space){
+			printk("page_to_phys %p\n", tmp);
+		}
+	}*/
 	return 0;    // Non-zero return means that the module couldn't be loaded.
 }
 
