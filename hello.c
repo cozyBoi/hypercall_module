@@ -18,8 +18,7 @@ MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Lakshmanan");
 MODULE_DESCRIPTION("A Simple Hello World module");
 
-unsigned long long int dump_space = 1;
-
+unsigned long long int dump_space = 0;
 extern struct mem_section *mem_section[NR_SECTION_ROOTS];
 extern inline struct mem_section *__pfn_to_section(unsigned long pfn);
 extern unsigned long usr_page_to_pfn(struct page *page);
@@ -70,11 +69,20 @@ static int __init hello_init(void)
     }
 	printk("\n");
 	*/
-	printk("dump data %llx\n", dump_space);
-	curr_pfn = dump_space >> 12;
-	curr_page = usr_pfn_to_page(curr_pfn);
-	printk("page_to_pfn %lx\n", usr_page_to_pfn(curr_page));
-	printk("mapping %p\n", curr_page->mapping);
+
+    //dump data == 0 -> ok to write
+    //test 1000000 times
+    for(i = 0; i < 1000000;){
+        if(dump_space != 0){
+            printk("dump data %llx\n", dump_space);
+    	    curr_pfn = dump_space >> 12;
+    	    curr_page = usr_pfn_to_page(curr_pfn);
+         	printk("page_to_pfn %lx\n", usr_page_to_pfn(curr_page));
+        	printk("mapping %p\n", curr_page->mapping); //if exist -> do find pid
+            i++;
+            dump_space = 0;
+        } 
+    }
 	/*
 	struct mem_section *curr_memsect = __pfn_to_section(curr_pfn);
 	printk("mem_section %p\n", curr_memsect);
