@@ -8,6 +8,11 @@
 #include <uapi/linux/kvm_para.h>
 #include <linux/cpumask.h>
 #include <linux/delay.h>
+#include <linux/wait.h>
+#include <linux/sched.h>
+#include <linux/time.h>
+#include <linux/workqueue.h>
+
 //#include <linux/mm_type.h>
 //#include <sys/mman.h> //mlock to prevent swap out
 //#include <sys/types.h>
@@ -23,6 +28,8 @@ extern struct mem_section *mem_section[NR_SECTION_ROOTS];
 extern inline struct mem_section *__pfn_to_section(unsigned long pfn);
 extern unsigned long usr_page_to_pfn(struct page *page);
 extern struct page* usr_pfn_to_page(unsigned long pfn);
+
+static wait_queue_head_t my_wait_queue;
 
 unsigned long long int pow16(int p){
     int i = 0;
@@ -40,6 +47,7 @@ static int __init hello_init(void)
     unsigned long long int addr = 0;
 	struct page*curr_page = NULL;
 	unsigned long int curr_pfn;
+	init_waitqueue_head(&my_wait_queue);
 	/*
     for(i = 0; i < 16; i++){
         dump_space[i] = 0x00;
@@ -81,7 +89,12 @@ static int __init hello_init(void)
         	printk("mapping %p\n", curr_page->mapping); //if exist -> do find pid
             i++;
             dump_space = 0;
-        } 
+        }
+		else{
+			//sleep
+			//wait_event(my_wait_queue, dump_space != 0);
+			cond_resched();
+		}
     }
 	/*
 	struct mem_section *curr_memsect = __pfn_to_section(curr_pfn);
