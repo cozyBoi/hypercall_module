@@ -1,1 +1,1 @@
-kernel//root/kernel_module/hello.ko
+kernel//root/hypercall_module/hello.ko

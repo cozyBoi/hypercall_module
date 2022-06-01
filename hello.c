@@ -13,7 +13,7 @@
 #include <linux/time.h>
 #include <linux/workqueue.h>
 #include <linux/rmap.h>
-
+#include <linux/rbtree.h>
 //#include <linux/mm_type.h>
 //#include <sys/mman.h> //mlock to prevent swap out
 //#include <sys/types.h>
@@ -24,12 +24,13 @@ MODULE_LICENSE("GPL");
 MODULE_AUTHOR("Lakshmanan");
 MODULE_DESCRIPTION("A Simple Hello World module");
 
-unsigned long long int dump_space = 0;
-extern struct mem_section *mem_section[NR_SECTION_ROOTS];
-extern inline struct mem_section *__pfn_to_section(unsigned long pfn);
+unsigned long long int dump_space[16];
 extern unsigned long usr_page_to_pfn(struct page *page);
 extern struct page* usr_pfn_to_page(unsigned long pfn);
 extern inline struct anon_vma *page_anon_vma(struct page *page);
+extern struct anon_vma_chain *usr_anon_vma_interval_tree_iter_first(struct rb_root *root,unsigned long first, unsigned long last);
+//extern struct anon_vma_chain *anon_vma_interval_tree_iter_next(struct anon_vma_chain *node, unsigned long first, unsigned long last);
+
 
 static wait_queue_head_t my_wait_queue;
 
@@ -53,7 +54,6 @@ static int __init hello_init(void)
 	struct anon_vma_chain *avc;
 	struct rb_root *rb_root;
 	pgoff_t pgoff;
-	init_waitqueue_head(&my_wait_queue);
 	/*
     for(i = 0; i < 16; i++){
         dump_space[i] = 0x00;
@@ -86,27 +86,32 @@ static int __init hello_init(void)
 
     //dump data == 0 -> ok to write
     //test 1000000 times
-    for(i = 0; i < 1000000;){
-        if(dump_space != 0){
-            printk("dump data %llx\n", dump_space);
+	
+    while(1){
+		for(i = 0; i < 16; i++){
+			if(dump_space[i] == 0) continue;
+            printk("i %d, dump data %llx\n", i, dump_space[i]);
+			dump_space[i] = 0;
+			/*
     	    curr_pfn = dump_space >> 12;
     	    curr_page = usr_pfn_to_page(curr_pfn);
-         	printk("page_to_pfn %lx\n", usr_page_to_pfn(curr_page));
-        	printk("mapping %p\n", curr_page->mapping); //if exist -> do find pid
+         	//printk("page_to_pfn %lx\n", usr_page_to_pfn(curr_page));
+        	//printk("mapping %p\n", curr_page->mapping); //if exist -> do find pid
 			curr_anon_vma = page_anon_vma(curr_page);
 			if(curr_anon_vma!= NULL){
-				printk("anon %p\n", curr_anon_vma);
+				//printk("anon %p\n", curr_anon_vma);
 				//pgoff = curr_page->index << (PAGE_CACHE_SHIFT - PAGE_SHIFT);
 				pgoff = curr_page->index;
 				rb_root = &(curr_anon_vma->rb_root);
-				anon_vma_interval_tree_foreach(avc, rb_root, pgoff, pgoff){
+				//anon_vma_interval_tree_foreach(avc, rb_root, pgoff, pgoff){
+					avc = usr_anon_vma_interval_tree_iter_first(rb_root, pgoff, pgoff); 
 					struct vm_area_struct *vma = avc->vma;
 					if(vma != NULL){
-						printk("vma %p\n", vma);
+						//printk("vma %p\n", vma);
 						if(vma->vm_mm != NULL){
-							printk("vm_mm %p\n", vma->vm_mm);
+							//printk("vm_mm %p\n", vma->vm_mm);
 							if(vma->vm_mm->owner != NULL){
-								printk("owner %p\n", vma->vm_mm->owner);
+								//printk("owner %p\n", vma->vm_mm->owner);
 							}
 							if(vma->vm_mm->pgd != NULL){
 								printk("pgd %p\n", vma->vm_mm->pgd);
@@ -114,16 +119,11 @@ static int __init hello_init(void)
 						}
 					}
 				}
-			}
+			*/
 				//printk("pid : %d\n", ((struct vm_area_struct*)(curr_page->mapping))->vm_mm->owner->pid);
-            i++;
-            dump_space = 0;
+            //i++;
         }
-		else{
-			//sleep
-			//wait_event(my_wait_queue, dump_space != 0);
-			cond_resched();
-		}
+		cond_resched();
     }
 	/*
 	struct mem_section *curr_memsect = __pfn_to_section(curr_pfn);
